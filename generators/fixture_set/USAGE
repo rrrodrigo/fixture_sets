@@ -1,0 +1,15 @@
+Fixture Set Generator - Used to create a new fixture set specification. Fixture sets are sandboxed, one off groups
+of YAML fixture data generated programmatically from the development or production database. One can also create non-generated
+fixture sets by creating the YAML files by hand.
+
+./script/generate fixture_set dashboard
+Creates	test/fixture_sets/dashboard/dashboard_fixture_set.rb
+
+Example Fixture Set:
+User.active = User.find_by_username('blake')
+FixtureSet.new('dashboard') do |set|
+	set.spaces = User.active.visitable_spaces
+	set.users = [User.active]
+	set.pages = Page.with_scope(Scopings.in_my_spaces) { Page.find(:all) }
+	set.visits = Visit.find_all_by_user(User.active)
+end

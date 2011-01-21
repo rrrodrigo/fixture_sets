@@ -1,0 +1,11 @@
+Test Generator - Generates a new one-off test class against a given fixture set.
+
+./script/generate test multiple_categorization_bug [fixture_set] (Default: base)
+Creates test/misc/multiple_categorization_bug_test.rb
+
+Example test:
+class MultipleCategorizationBugTest < Test::Unit::TestCase
+	fixture_set :dashboard
+end
+
+The :base fixture_set indicates that all fixtures from the default test/fixtures directory should be loaded.

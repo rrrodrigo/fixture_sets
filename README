@@ -1,0 +1,43 @@
+Rails Fixture Sets
+
+The Rails Fixture Sets plugin attempts to solve a common problem with core Rails fixtures: inflexibility. Once your application grows,
+maintaining your fixtures becomes a hassle and reproducing bugs in tests becomes very cumbersome. Fixture sets aims to free you of this trend by providing sandboxed, named sets of fixtures that are produced against a development/production database from a pure Ruby
+specification file. Here is how it works:
+	1. Generate a new fixture set via script/generate fixture_set
+	2. Tweak the specification file such that it can build your testing environment via simple ActiveRecord find statements. (see below)
+	3. Build the YAML fixtures for your new fixture set via rake test:fixture_sets:scan
+	4. Utilize the fixture set in 1 or more test files via the class method 'fixture_set'
+The fixture sets can be very broad or narrow, depending on your needs. But keep in mind that the larger the data set, the slower
+it will be when loading.
+
+Rake Tasks - These tasks are used for managing fixture sets.
+rake test:fixture_sets:scan [RAILS_ENV=development] - Scan for new fixture sets without YAML files
+rake test:fixture_sets:rebuild [RAILS_ENV=development] - Rebuild fixture sets by evaluating the spec and replacing the YAML files
+	- Confirms each spec rebuild
+	- Confirmation can be suppressed with FORCE=yes
+	- Specify only certain sets with ONLY=set1,set2
+	- Specify an alternate database to rebuild against with RAILS_ENV=production
+	
+Fixture Set Generator - Used to create a new fixture set specification.
+./script/generate fixture_set dashboard
+Creates	test/fixture_sets/dashboard/dashboard_fixture_set.rb
+
+Example spec:
+User.active = User.find_by_username('blake')
+FixtureSet.define('dashboard') do |set|
+	set.spaces = User.active.visitable_spaces
+	set.users = [User.active]
+	set.pages = Page.with_scope(Scopings.in_my_spaces) { Page.find(:all) }
+	set.visits = Visit.find_all_by_user(User.active)
+end
+
+Test Generator - Generates a new one-off test class against a given fixture set.
+./script/generate test multiple_categorization_bug [fixture_set] (Default: base)
+Creates test/misc/multiple_categorization_bug_test.rb
+
+Example test:
+class MultipleCategorizationBugTest < Test::Unit::TestCase
+	fixture_set :dashboard
+end
+
+The :base fixture_set indicates that all fixtures from the default test/fixtures directory should be loaded.
